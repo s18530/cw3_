@@ -32,9 +32,24 @@ namespace cw3.Controllers
         [HttpPost]
         public IActionResult CreateStudent(Student student)
         {
-            //TODO add to database & generate index number
             student.IndexNumber = $"s{new Random().Next(1, 20000)}";
             return Ok(student);
+        }
+        
+        //PUT
+        [HttpPut("{id}")]
+        public IActionResult UpdateStudent(Student student, int id)
+        {
+            student.IdStudent = id;
+            return Ok("Aktualizacja dokończona");
+        }
+        
+        //DELETE
+        [HttpDelete("{id}")]
+        public IActionResult DeleteStudent(Student student, int id)
+        {
+            //usuniecie
+            return Ok("Usuwanie ukończone");
         }
     }
 }
