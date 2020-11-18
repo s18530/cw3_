@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data.SqlClient;
 using cw3.DAL;
 using cw3.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +11,7 @@ namespace cw3.Controllers
     public class StudentsController : ControllerBase
     {
         private readonly IDbService _dbService;
-
+        private const string ConString = "Data Source=db-mssql;Initial Catalog=s18530;Integrated Security=True";
         public StudentsController(IDbService dbService)
         {
             _dbService = dbService;
@@ -20,6 +21,20 @@ namespace cw3.Controllers
         [HttpGet]
         public IActionResult GetStudent(string orderBy)
         {
+            using (SqlConnection con = new SqlConnection(ConString))
+            using (SqlCommand com = new SqlCommand())
+            {
+                com.Connection = con;
+                com.CommandText = "SELECT * FROM Students";
+                
+                con.Open();
+                SqlDataReader dr = com.ExecuteReader();
+                while (dr.Read())
+                {
+                    
+                }
+            }
+            
             return Ok(_dbService.GetStudents());
         }
         
