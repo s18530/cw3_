@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using cw3.DAL;
 using cw3.Models;
@@ -21,6 +22,8 @@ namespace cw3.Controllers
         [HttpGet]
         public IActionResult GetStudent(string orderBy)
         {
+            var list = new List<Student>();
+            
             using (SqlConnection con = new SqlConnection(ConString))
             using (SqlCommand com = new SqlCommand())
             {
@@ -31,11 +34,16 @@ namespace cw3.Controllers
                 SqlDataReader dr = com.ExecuteReader();
                 while (dr.Read())
                 {
-                    
+                    var st = new Student();
+                    st.IndexNumber = dr["IndexNumber"].ToString();
+                    st.FirstName = dr["FirstName"].ToString();
+                    st.LastName = dr["LastName"].ToString();
+                    list.Add(st);
                 }
             }
             
-            return Ok(_dbService.GetStudents());
+            //return Ok(_dbService.GetStudents());
+            return Ok(list);
         }
         
         [HttpGet("{id}")]
@@ -61,9 +69,9 @@ namespace cw3.Controllers
         
         //PUT
         [HttpPut("{id}")]
-        public IActionResult UpdateStudent(Student student, int id)
+        public IActionResult UpdateStudent(Student student, string id)
         {
-            student.IdStudent = id;
+            student.IndexNumber = id;
             return Ok("Aktualizacja dokończona");
         }
         
