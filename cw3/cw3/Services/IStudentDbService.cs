@@ -5,10 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace cw3.DAL
 {
-    public interface IDbService
+    public interface IStudentDbService
     {
-        public IEnumerable<Student> GetStudents();
-
         public IActionResult EnrollStudent(EnrollStudentRequest enrollStudentRequest);
     }
 }

@@ -1,4 +1,6 @@
-﻿using cw3.DAL;
+﻿using System;
+using System.Data.SqlClient;
+using cw3.DAL;
 using cw3.DTOs.Requests;
 using cw3.DTOs.Responses;
 using cw3.Models;
@@ -11,9 +13,9 @@ namespace cw3.Controllers
     
     public class EnrollmentsController : ControllerBase
     {
-        private IDbService _service;
+        private IStudentDbService _service;
 
-        public EnrollmentsController(IDbService service)
+        public EnrollmentsController(IStudentDbService service)
         {
             _service = service;
         }
@@ -21,12 +23,9 @@ namespace cw3.Controllers
         [HttpPost]
         public IActionResult EnrollStudent(EnrollStudentRequest request)
         {
-            var st = new Student();
-            st.FirstName = request.FirstName;
-            
+            _service.EnrollStudent(request);
             var response = new EnrollStudentResponse();
-            response.LastName = st.LastName;
-            return Ok();
+            return Created("Enroll student", response);
         }
     }
 }

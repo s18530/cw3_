@@ -11,11 +11,11 @@ namespace cw3.Controllers
     [Route("api/students")]
     public class StudentsController : ControllerBase
     {
-        private readonly IDbService _dbService;
+        private readonly IStudentDbService _studentDbService;
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18530;Integrated Security=True";
-        public StudentsController(IDbService dbService)
+        public StudentsController(IStudentDbService studentDbService)
         {
-            _dbService = dbService;
+            _studentDbService = studentDbService;
         }
 
         // GET
