@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using cw3.DAL;
 using cw3.Models;
+using cw3.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace cw3.Controllers

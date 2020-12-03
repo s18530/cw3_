@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data.SqlClient;
-using cw3.DAL;
 using cw3.DTOs.Requests;
 using cw3.DTOs.Responses;
 using cw3.Models;
+using cw3.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace cw3.Controllers
@@ -25,7 +25,16 @@ namespace cw3.Controllers
         {
             _service.EnrollStudent(request);
             var response = new EnrollStudentResponse();
-            return Created("Enroll student", response);
+            return Ok(response);
+        }
+
+        [Route("api/enrollments/promotions")]
+        [HttpPost]
+        public IActionResult PromoteStudent(PromoteStudentRequest request)
+        {
+            _service.PromoteStudent(request);
+            var response = new PromoteStudentResponse();
+            return Ok(response);
         }
     }
 }
