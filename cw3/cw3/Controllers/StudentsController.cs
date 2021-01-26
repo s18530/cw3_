@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using cw3.DAL;
 using cw3.Models;
-using cw3.Services;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace cw3.Controllers
 {
@@ -11,11 +12,11 @@ namespace cw3.Controllers
     [Route("api/students")]
     public class StudentsController : ControllerBase
     {
-        private readonly IStudentDbService _studentDbService;
+        private readonly IDbService _dbService;
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18530;Integrated Security=True";
-        public StudentsController(IStudentDbService studentDbService)
+        public StudentsController(IDbService dbService)
         {
-            _studentDbService = studentDbService;
+            _dbService = dbService;
         }
 
         // GET
@@ -50,6 +51,7 @@ namespace cw3.Controllers
         [HttpGet("{indexNumber}")]
         public IActionResult GetStudents(string indexNumber)
         {
+            //id = "s18530";
             string id = "s18530";
             var list = new List<Enrollment>();
 
