@@ -3,6 +3,7 @@ using System.Data;
 using System.Data.SqlClient;
 using cw3.DTOs.Requests;
 using cw3.DTOs.Responses;
+using cw3.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace cw3.Services
@@ -26,7 +27,7 @@ namespace cw3.Services
                 try
                 {
 
-                    com.CommandText = $"SELECT IdStudy FROM Studies WHERE Name = @Name";
+                    com.CommandText = "SELECT IdStudy FROM Studies WHERE Name = @Name";
                     com.Parameters.AddWithValue("Name", request.Studies);
 
                     if (!dr.Read())
@@ -38,7 +39,7 @@ namespace cw3.Services
 
                     //dr.Close();
                     com.CommandText =
-                        $"SELECT e.IdEnrollment, e.Semester, e.IdStudy, e.StartDate FROM Enrollment e INNER JOIN Studies st ON e.IdStudy = st.idStudy WHERE e.Semester = 1 AND st.Name = @name";
+                        "SELECT e.IdEnrollment, e.Semester, e.IdStudy, e.StartDate FROM Enrollment e INNER JOIN Studies st ON e.IdStudy = st.idStudy WHERE e.Semester = 1 AND st.Name = @name";
                     int idEnrollment;
                     int idStudy = (int)dr["IdStudy"];
                     DateTime startDate = DateTime.Now;
@@ -48,7 +49,7 @@ namespace cw3.Services
                     {
                         idEnrollment = 1;
                         com.CommandText =
-                            $"INSERT INTO Enrollment (IdEnrollment, Semester, IdStudy, StartDate) VALUES (IdEnrollment, 1, @IdStudy, @StartDate)";
+                            "INSERT INTO Enrollment (IdEnrollment, Semester, IdStudy, StartDate) VALUES (IdEnrollment, 1, @IdStudy, @StartDate)";
                         com.Parameters.AddWithValue("IdStudy", request.Studies);
                         com.Parameters.AddWithValue("StartDate", startDate.ToString());
                         com.ExecuteNonQuery();
@@ -58,7 +59,7 @@ namespace cw3.Services
                     {
                         idEnrollment = (int) dr["MaxId"];
                         com.CommandText =
-                            $"INSERT INTO Enrollment (IdEnrollment, Semester, IdStudy, StartDate) VALUES (IdEnrollment, 1, @IdStudy, @StartDate)";
+                            "INSERT INTO Enrollment (IdEnrollment, Semester, IdStudy, StartDate) VALUES (IdEnrollment, 1, @IdStudy, @StartDate)";
                         com.Parameters.AddWithValue("IdStudy", request.Studies);
                         com.Parameters.AddWithValue("StartDate", startDate.ToString());
                         com.ExecuteNonQuery();
@@ -76,7 +77,7 @@ namespace cw3.Services
                     //dr.Close();
 
                     com.CommandText =
-                        $"SELECT * FROM Student WHERE IndexNumber = @IndexNumber";
+                        "SELECT * FROM Student WHERE IndexNumber = @IndexNumber";
                     com.Parameters.AddWithValue("IndexNumber", request.IndexNumber);
                     com.ExecuteNonQuery();
 
@@ -87,7 +88,7 @@ namespace cw3.Services
                     }
                     else
                     {
-                        com.CommandText = $"INSERT INTO Student(IndexNumber, FirstName, LastName, BirthDate, IdEnrollment) VALUES(@IndexNumber, @FirstName, @LastName, @BirthDate, @IdEnrollment)";
+                        com.CommandText = "INSERT INTO Student(IndexNumber, FirstName, LastName, BirthDate, IdEnrollment) VALUES(@IndexNumber, @FirstName, @LastName, @BirthDate, @IdEnrollment)";
                         com.Parameters.AddWithValue("IndexNumber", request.IndexNumber);
                         com.Parameters.AddWithValue("FirstName", request.FirstName);
                         com.Parameters.AddWithValue("LastName", request.LastName);
@@ -124,7 +125,7 @@ namespace cw3.Services
                 try
                 {
                     com.CommandText =
-                        $"SELECT IdEnrollment, Semester, Enrollment.IdStudy, StartDate FROM Enrollment INNER JOIN Studies ON Enrollment.IdStudy = Studies.IdStudy WHERE Semester = @Semester AND Name = @Name";
+                        "SELECT IdEnrollment, Semester, Enrollment.IdStudy, StartDate FROM Enrollment INNER JOIN Studies ON Enrollment.IdStudy = Studies.IdStudy WHERE Semester = @Semester AND Name = @Name";
                     com.Parameters.AddWithValue("Name", request.Name);
                     cmd.Parameters.AddWithValue("Name", request.Name);
                     com.Parameters.AddWithValue("Semester", request.Semester);
@@ -164,6 +165,42 @@ namespace cw3.Services
                     return BadRequest(exc.Message);
                 }
             }
+        }
+        
+
+        public Student GetStudent(string indexNumber)
+        {
+            using (SqlConnection con = new SqlConnection(ConString))
+            using (SqlCommand com = new SqlCommand())
+            { 
+                com.Connection = con;
+                com.CommandText =
+                    @"SELECT s.IndexNumber,
+                                       s.FirstName,
+                                       s.LastName,
+                                       s.BirthDate,
+                                       s.IdEnrollment 
+                                FROM Student s
+                                WHERE s.IndexNumber = @indexNumber";
+            
+
+            com.Parameters.AddWithValue("indexNumber", indexNumber);
+            con.Open();
+            SqlDataReader dr = com.ExecuteReader();
+            
+            if (dr.Read())
+            {
+                return new Student
+                {
+                    IndexNumber = dr["IndexNumber"].ToString(),
+                    FirstName = dr["FirstName"].ToString(),
+                    LastName = dr["LastName"].ToString(),
+                    BirthDate = DateTime.Parse(dr["BirthDate"].ToString()),
+                    IdEnrollment = int.Parse(dr["IdEnrollment"].ToString())
+                };
+            }
+            }; 
+            return null;
         }
     }
 }

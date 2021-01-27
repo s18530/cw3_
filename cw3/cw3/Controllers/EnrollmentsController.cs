@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace cw3.Controllers
 {
-    [Route("api/enrollments")]
+    
     [ApiController]
+    [Route("api/enrollments")]
     
     public class EnrollmentsController : ControllerBase
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
-using cw3.DAL;
 using cw3.Models;
+using cw3.Services;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -12,9 +12,9 @@ namespace cw3.Controllers
     [Route("api/students")]
     public class StudentsController : ControllerBase
     {
-        private readonly IDbService _dbService;
+        private readonly IStudentDbService _dbService;
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18530;Integrated Security=True";
-        public StudentsController(IDbService dbService)
+        public StudentsController(IStudentDbService dbService)
         {
             _dbService = dbService;
         }
@@ -30,7 +30,7 @@ namespace cw3.Controllers
             {
                 com.Connection = con;
                 com.CommandText =
-                    $"SELECT FirstName, LastName, IndexNumber, Name, Semester FROM Student INNER JOIN Enrollment on Enrollment.IdEnrollment = Student.IdEnrollment INNER JOIN Studies on Studies.IdStudy = Enrollment.IdStudy;";
+                    "SELECT FirstName, LastName, IndexNumber, Name, Semester FROM Student INNER JOIN Enrollment on Enrollment.IdEnrollment = Student.IdEnrollment INNER JOIN Studies on Studies.IdStudy = Enrollment.IdStudy;";
                 
                 con.Open();
                 SqlDataReader dr = com.ExecuteReader();
@@ -54,13 +54,14 @@ namespace cw3.Controllers
             //id = "s18530";
             string id = "s18530";
             var list = new List<Enrollment>();
+            var listt = new List<Student>();
 
             using (SqlConnection con = new SqlConnection(ConString))
             using (SqlCommand com = new SqlCommand())
             {
                 com.Connection = con;
                 com.CommandText =
-                    $"SELECT IndexNumber, FirstName, LastName, Name, Semester, StartDate FROM Student INNER JOIN Enrollment on Student.IdEnrollment = Enrollment.IdEnrollment INNER JOIN Studies on Enrollment.IdStudy = Studies.IdStudy WHERE Student.IndexNumber=@id;";
+                    "SELECT IndexNumber, FirstName, LastName, Name, Semester, StartDate FROM Student INNER JOIN Enrollment on Student.IdEnrollment = Enrollment.IdEnrollment INNER JOIN Studies on Enrollment.IdStudy = Studies.IdStudy WHERE Student.IndexNumber=@id;";
                 
                 com.Parameters.AddWithValue("id", indexNumber);
                 con.Open();
@@ -68,11 +69,16 @@ namespace cw3.Controllers
                 if (dr.Read())
                 {
                     var enr = new Enrollment();
+                    var st = new Student();
+                    st.IndexNumber = dr["IndexNumber"].ToString();
+                    st.FirstName = dr["FirstName"].ToString();
+                    st.LastName = dr["LastName"].ToString();
                     enr.Name = dr["Name"].ToString();
                     enr.Semester = dr["Semester"].ToString();
                     enr.StartDate = DateTime.Parse(dr["StartDate"].ToString()!);
                     list.Add(enr);
-                    return Ok(enr);
+                    listt.Add(st);
+                    return Ok(st);
                 }
             }
             return NotFound();

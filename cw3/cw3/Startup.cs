@@ -2,10 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using cw3.DAL;
+using cw3.Middleware;
 using cw3.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -29,29 +30,56 @@ namespace cw3
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IStudentDbService, SqlServerDbService>();
+   
             services.AddControllers();
 
-            /*services.AddSwaggerGen(config =>
+            services.AddSwaggerGen(config =>
             {
                 config.SwaggerDoc("v1", new OpenApiInfo {Title = "Students App API", Version = "v1"});
-            });*/
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IStudentDbService studentDbService)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
             
-            /*app.UseSwagger();
+            app.UseSwagger();
             app.UseSwaggerUI(config =>
             {
                 config.SwaggerEndpoint("/swagger/v1/swagger.json", "Students App API");
-            });*/
+            });
 
-            //app.UseHttpsRedirection();
+            app.UseMiddleware<LoggingMiddleware>();
+            
+            app.UseWhen(context => context.Request.Path.ToString().Contains("secret"), app=>
+            {
+                app.Use(async (context, next) =>
+                {
+                    if (!context.Request.Headers.ContainsKey("Index"))
+                    {
+                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        await context.Response.WriteAsync("Musisz podac numer indeksu");
+                        return;
+                    }
+
+                    var index = context.Request.Headers["Index"].ToString();
+                    var student = studentDbService.GetStudent(index);
+                    
+                    if (student == null)
+                    {
+                        context.Response.StatusCode = StatusCodes.Status404NotFound;
+                        await context.Response.WriteAsync("Studenta nie znaleziono w bazie");
+                        return;
+                    }
+                    await next();
+                });
+            });
+            
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 
