@@ -1,0 +1,5 @@
+ Metoda: GET 
+ Ścieżka: /api/students/secret 
+ Ciało żądania HTTP:  
+ Informacje z Query String: ?Index=s18530 
+ -----------

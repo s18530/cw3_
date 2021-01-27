@@ -31,11 +31,10 @@ namespace cw3.Middleware
                     context.Request.Body.Position = 0;
                 }
                 
-                //do pliku/bazy
+                string appendText = $" Metoda: {method} \n Ścieżka: {path} \n Ciało żądania HTTP: {bodyStr} \n Informacje z Query String: {queryString} \n ----------- \n";
+                File.AppendAllText("requestsLog.txt", appendText);
                 
             }
-            
-            
             if(_next != null) await _next(context);
         }
     }
