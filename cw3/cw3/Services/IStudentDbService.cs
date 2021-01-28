@@ -8,7 +8,7 @@ namespace cw3.Services
     {
         public IActionResult EnrollStudent(EnrollStudentRequest enrollStudentRequest);
         public IActionResult PromoteStudent(PromoteStudentRequest promoteStudentRequest);
-
         Student GetStudent(string indexNumber);
+        
     }
 }

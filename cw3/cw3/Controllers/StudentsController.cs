@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using cw3.DTOs.Requests;
 using cw3.Models;
 using cw3.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 
 namespace cw3.Controllers
@@ -13,11 +19,14 @@ namespace cw3.Controllers
     [Route("api/students")]
     public class StudentsController : ControllerBase
     {
+        public IConfiguration Configuration { get; set; }
         private readonly IStudentDbService _dbService;
+        
         private const string ConString = "Data Source=db-mssql;Initial Catalog=s18530;Integrated Security=True";
-        public StudentsController(IStudentDbService dbService)
+        public StudentsController(IStudentDbService dbService, IConfiguration configuration)
         {
             _dbService = dbService;
+            Configuration = configuration;
         }
 
         // GET
@@ -103,6 +112,37 @@ namespace cw3.Controllers
         {
             //usuniecie
             return Ok("Usuwanie ukończone");
+        }
+        
+        //LOGIN
+        [HttpPost("login")]
+        public IActionResult Login(LoginRequestDto loginRequestDto)
+        {
+            var claims = new[]
+            {
+                new Claim(ClaimTypes.NameIdentifier, "1"),
+                new Claim(ClaimTypes.Name, "Konrad123"),
+                new Claim(ClaimTypes.Role, "admin"),
+                new Claim(ClaimTypes.Role, "student"),
+            };
+            
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["SecretKey"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var token = new JwtSecurityToken
+            (
+                issuer: "",
+                audience: "Students",
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(10),
+                signingCredentials: creds
+            );
+            
+            return Ok(new
+            {
+                token = new JwtSecurityTokenHandler().WriteToken(token),
+                refreshToken = Guid.NewGuid()
+            });
         }
     }
 }
