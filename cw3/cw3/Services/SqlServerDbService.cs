@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using cw3.DTOs.Requests;
@@ -166,40 +167,34 @@ namespace cw3.Services
                 }
             }
         }
-        
 
         public Student GetStudent(string indexNumber)
         {
+            //id = "s18530";
+            var list = new List<Student>();
+
             using (SqlConnection con = new SqlConnection(ConString))
             using (SqlCommand com = new SqlCommand())
-            { 
+            {
                 com.Connection = con;
                 com.CommandText =
-                    @"SELECT s.IndexNumber,
-                                       s.FirstName,
-                                       s.LastName,
-                                       s.BirthDate,
-                                       s.IdEnrollment 
-                                FROM Student s
-                                WHERE s.IndexNumber = @indexNumber";
-            
-
-            com.Parameters.AddWithValue("indexNumber", indexNumber);
-            con.Open();
-            SqlDataReader dr = com.ExecuteReader();
-            
-            if (dr.Read())
-            {
-                return new Student
+                    "SELECT * FROM Student WHERE IndexNumber=@indexNumber;";
+                
+                com.Parameters.AddWithValue("indexNumber", indexNumber);
+                con.Open();
+                SqlDataReader dr = com.ExecuteReader();
+                if (dr.Read())
                 {
-                    IndexNumber = dr["IndexNumber"].ToString(),
-                    FirstName = dr["FirstName"].ToString(),
-                    LastName = dr["LastName"].ToString(),
-                    BirthDate = DateTime.Parse(dr["BirthDate"].ToString()),
-                    IdEnrollment = int.Parse(dr["IdEnrollment"].ToString())
-                };
+                    return new Student
+                    {
+                        IndexNumber = dr["IndexNumber"].ToString(),
+                        FirstName = dr["FirstName"].ToString(),
+                        LastName = dr["LastName"].ToString(),
+                        BirthDate = DateTime.Parse(dr["BirthDate"].ToString()),
+                        IdEnrollment = (int) dr["IdEnrollment"]
+                    };
+                }
             }
-            }; 
             return null;
         }
     }

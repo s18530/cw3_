@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using cw3.Handlers;
 using cw3.Middleware;
 using cw3.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -29,14 +31,17 @@ namespace cw3
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication("AuthenticationBasic")
+                .AddScheme<AuthenticationSchemeOptions, BasicAuthHandler>("AuthenticationBasic", null);
+            
             services.AddSingleton<IStudentDbService, SqlServerDbService>();
-   
-            services.AddControllers();
-
+            
             services.AddSwaggerGen(config =>
             {
                 config.SwaggerDoc("v1", new OpenApiInfo {Title = "Students App API", Version = "v1"});
             });
+            
+            services.AddControllers().AddXmlSerializerFormatters();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -65,24 +70,27 @@ namespace cw3
                         await context.Response.WriteAsync("Musisz podac numer indeksu");
                         return;
                     }
-
-                    var index = context.Request.Headers["Index"].ToString();
-                    var student = studentDbService.GetStudent(index);
                     
-                    if (student == null)
+                    var index = context.Request.Headers["Index"].ToString();
+                    if (index != null)
                     {
-                        context.Response.StatusCode = StatusCodes.Status404NotFound;
-                        await context.Response.WriteAsync("Studenta nie znaleziono w bazie");
-                        return;
+                        var student = studentDbService.GetStudent(index);
+                    
+                        if (student == null)
+                        {
+                            context.Response.StatusCode = StatusCodes.Status404NotFound;
+                            await context.Response.WriteAsync("Studenta nie znaleziono w bazie");
+                            return;
+                        }
                     }
+
                     await next();
                 });
             });
             
             app.UseHttpsRedirection();
-
             app.UseRouting();
-
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
