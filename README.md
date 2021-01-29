@@ -1,2 +1,2 @@
 # Konrad Pilewski s18530
-zad 5 ukończone
+zad 7.1 ukończone
